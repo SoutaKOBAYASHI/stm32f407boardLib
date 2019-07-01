@@ -81,7 +81,7 @@ private:
 	}
 
 protected:
-	static GPIO_TypeDef* const usePort_ = GPIOD;
+	GPIO_TypeDef* const usePort_ = GPIOD;
 
 	static void GPIO_Init_reference(GPIO_TypeDef* GPIOx, const GPIO_InitTypeDef& GPIO_InitStruct)
 	{

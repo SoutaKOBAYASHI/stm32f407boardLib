@@ -5,7 +5,7 @@
  *      Author: User
  */
 #include "uart.hpp"
-
+/*
 std::function<void(const std::string&)> uartSendString = [](const std::string&){};
 
 void UART::pinsInit_usart1()
@@ -67,9 +67,4 @@ void UART::uartInit_(const uint32_t setBaudrate)
 	NVIC_Init(&NVIC_InitStruct);
 }
 
-void UART::TransmitData(uint8_t sendByte)
-{
-	while(!USART_GetFlagStatus(useUartName_, USART_FLAG_TXE));
-	USART_SendData(useUartName_, (uint16_t)sendByte);
-}
-
+*/

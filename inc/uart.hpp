@@ -15,21 +15,24 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_conf.h"
 
+enum class uartName{uart1, uart2, uart3};
+
+template<uartName useUartName, uint32_t setBaudrate = 9600>
 class UART
 {
 public:
-	UART() = delete;
-
-	enum class name{uart1, uart2};
-	UART(const name useUartName, const uint32_t setBaudrate = defaultBaudrate_) : useUartName_(useUartName == name::uart1 ? USART1 : USART2)
+	UART()
 	{
-		uartInit_(setBaudrate);
-		if(useUartName_ == USART1)pinsInit_usart1();
-		else pinsInit_usart2();
+		uartInit_();
+		pinsInit_();
 	}
 
 	/*transmit a byte.*/
-	void TransmitData(const uint8_t sendByte);
+	void TransmitData(const uint8_t sendByte)
+	{
+		while(!USART_GetFlagStatus(useUartName_(), USART_FLAG_TXE));
+		USART_SendData(useUartName_(), (uint16_t)sendByte);
+	}
 
 	/*overloaded functions of transmitting.*/
 	inline void TransmitData(const char sendByte){ TransmitData((uint8_t)sendByte); }
@@ -45,13 +48,47 @@ public:
 	inline void TransmitData(const std::vector<uint8_t>& sendVector){ for(auto i : sendVector)TransmitData(sendVector.at(i)); }
 
 private:
-	void pinsInit_usart1();
-	void pinsInit_usart2();
-	void uartInit_(const uint32_t setBaudrate);
-	static constexpr uint32_t defaultBaudrate_ = 9600;
-	USART_TypeDef* const useUartName_;
-};
+	void pinsInit_()
+	{
 
-extern std::function<void(const std::string&)> uartSendString;
+	}
+	void uartInit_()
+	{
+		if constexpr (useUartName_ == USART1)
+		{
+			RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+		}
+		else if (useUartName_ == USART2)
+		{
+			RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
+		}
+		else
+		{
+			RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
+		}
+
+		USART_InitTypeDef USART_InitStruct;
+		USART_StructInit(&USART_InitStruct);
+		USART_InitStruct.USART_Mode		= USART_Mode_Rx | USART_Mode_Tx;
+		USART_InitStruct.USART_BaudRate	= setBaudrate;
+		USART_Init(useUartName_(), &USART_InitStruct);
+
+		USART_Cmd(useUartName_(), ENABLE);
+
+		USART_ITConfig(useUartName_(), USART_IT_RXNE, ENABLE);
+
+		NVIC_InitTypeDef NVIC_InitStruct;
+		NVIC_InitStruct.NVIC_IRQChannel 					= 	useUartName_ == uartName::uart1 ? USART1_IRQn :
+																useUartName_ == uartName::uart2 ? USART3_IRQn : UART4_IRQn;
+		NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority	= 0x00;
+		NVIC_InitStruct.NVIC_IRQChannelCmd					= ENABLE;
+		NVIC_Init(&NVIC_InitStruct);
+	}
+	constexpr USART_TypeDef* useUartName_()
+	{
+		return	useUartName == uartName::uart1 ? USART1 :
+				useUartName == uartName::uart2 ? USART3 : UART4;
+	}
+};
 
 #endif /* MYHEADERS_UART_HPP_ */
