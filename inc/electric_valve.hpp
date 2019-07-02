@@ -46,7 +46,7 @@ public:
 
 		constexpr GPIO_InitTypeDef GPIO_InitStruct
 		{
-			useEvName,			//GPIO_Pin
+			(uint32_t)useEvName,			//GPIO_Pin
 			GPIO_Mode_OUT,		//GPIO_Mode
 			GPIO_Speed_100MHz,	//GPIO_Speed
 			GPIO_OType_PP,		//GPIO_OType
@@ -61,10 +61,10 @@ public:
 		else GPIO_ResetBits(usePortName, (uint16_t)useEvName);
 	}
 
-	virtual ~EV();
+	virtual ~EV(){}
 
 protected:
-	static GPIO_TypeDef* const usePortName = GPIOE;
+	GPIO_TypeDef* const usePortName = GPIOE;
 
 	static void GPIO_Init_reference(GPIO_TypeDef* const GPIOx, const GPIO_InitTypeDef& GPIO_InitStruct)
 	{

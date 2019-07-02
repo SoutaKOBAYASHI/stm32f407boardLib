@@ -53,8 +53,9 @@ public:
 
 	inline void toggle(){ GPIO_ToggleBits(use_gpioPort_, (uint16_t)useColor); }
 
+	virtual ~LED(){}
 protected:
-	static GPIO_TypeDef* const use_gpioPort_ = GPIOC;
+	GPIO_TypeDef* const use_gpioPort_ = GPIOC;
 
 	static void GPIO_Init_reference(GPIO_TypeDef* const GPIOx, const GPIO_InitTypeDef& GPIO_InitStruct)
 	{

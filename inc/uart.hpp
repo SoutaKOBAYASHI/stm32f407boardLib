@@ -54,11 +54,11 @@ private:
 	}
 	void uartInit_()
 	{
-		if constexpr (useUartName_ == USART1)
+		if(useUartName_() == USART1)
 		{
 			RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
 		}
-		else if (useUartName_ == USART2)
+		else if (useUartName_() == USART2)
 		{
 			RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
 		}
@@ -78,8 +78,8 @@ private:
 		USART_ITConfig(useUartName_(), USART_IT_RXNE, ENABLE);
 
 		NVIC_InitTypeDef NVIC_InitStruct;
-		NVIC_InitStruct.NVIC_IRQChannel 					= 	useUartName_ == uartName::uart1 ? USART1_IRQn :
-																useUartName_ == uartName::uart2 ? USART3_IRQn : UART4_IRQn;
+		NVIC_InitStruct.NVIC_IRQChannel 					= 	useUartName == uartName::uart1 ? USART1_IRQn :
+																useUartName == uartName::uart2 ? USART3_IRQn : UART4_IRQn;
 		NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority	= 0x00;
 		NVIC_InitStruct.NVIC_IRQChannelCmd					= ENABLE;
 		NVIC_Init(&NVIC_InitStruct);
