@@ -35,17 +35,17 @@ public:
 	}
 
 	/*overloaded functions of transmitting.*/
-	inline void TransmitData(const char sendByte){ TransmitData((uint8_t)sendByte); }
+	inline void TransmitData(const char sendByte) { TransmitData((uint8_t)sendByte); }
 
-	inline void TransmitData(const uint8_t* pSendData, const size_t size){ for(size_t i = 0;i < size;i++)TransmitData(*(pSendData+i)); }
-	inline void TransmitData(const char* pSendData, const size_t size){ for(size_t i = 0;i < size;i++)TransmitData(*(pSendData+i)); }
+	inline void TransmitData(const uint8_t* pSendData, const size_t size) { for (size_t i = 0; i < size; i++)TransmitData(*(pSendData + i)); }
+	inline void TransmitData(const char* pSendData, const size_t size) { for (size_t i = 0; i < size; i++)TransmitData(*(pSendData + i)); }
 
-	inline void TransmitData(const std::string& sendString) { TransmitData((uint8_t*)sendString.c_str(), sendString.size()); }
+	inline void TransmitData(const std::string & sendString) { TransmitData((uint8_t*)sendString.c_str(), sendString.size()); }
 	template<size_t S>
-	inline void TransmitData(const std::array<uint8_t,S>& sendDataArray){ for(auto i : sendDataArray)TransmitData(sendDataArray.at(i)); }
+	inline void TransmitData(const std::array<uint8_t, S> & sendDataArray) { for (auto i : sendDataArray)TransmitData((uint8_t)i); }
 	template<size_t S>
-	inline void TransmitData(const std::array<char,S>& sendDataArray){ for(auto i : sendDataArray)TransmitData((uint8_t)i); }
-	inline void TransmitData(const std::vector<uint8_t>& sendVector){ for(auto i : sendVector)TransmitData(sendVector.at(i)); }
+	inline void TransmitData(const std::array<char, S> & sendDataArray) { for (auto i : sendDataArray)TransmitData((uint8_t)i); }
+	inline void TransmitData(const std::vector<uint8_t> & sendVector) { for (auto i : sendVector)TransmitData((uint8_t)i); }
 
 private:
 	void pinsInit_()
