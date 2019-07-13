@@ -37,13 +37,17 @@ public:
 	}
 
 	template<typename T>
-	std::enable_if_t<std::is_unsigned<T>::value, T> readCount() const
+	auto readCount() const -> std::enable_if_t<std::is_floating_point<T>::value, T>
+		{ return static_cast<double>(static_cast<int16_t>(useTimer->CNT)); }
+
+	template<typename T>
+	auto readCount() const -> typename std::enable_if_t<std::is_unsigned<T>::value, T>
 	{
-		return (T)useTimer->CNT;
+		return static_cast<T>(useTimer->CNT);
 	}
 
 	template<typename T>
-	std::enable_if_t<std::is_signed_v<T> && !std::is_floating_point_v<T>, T> readCount() const
+	auto readCount() -> typename std::enable_if<std::is_signed<T>::value && !std::is_floating_point<T>::value, T>::type
 	{
 		const uint32_t countValue = (uint32_t)useTimer->CNT;
 		std::make_unsigned_t<T> returnValue = 0;
@@ -60,10 +64,6 @@ public:
 		}
 		return (T)returnValue;
 	}
-
-	template<typename T>
-	inline std::enable_if_t<std::is_floating_point<T>::value, T> readCount() const
-		{ return (double)readCount<int32_t>(); }
 
 	inline void clearCount(){ useTimer->CNT = 0; }
 	inline void setCount(uint32_t setValue){ useTimer->CNT = setValue; }
