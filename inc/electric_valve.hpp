@@ -14,6 +14,27 @@
 #include <type_traits>
 #include <utility>
 
+#ifdef VERSION_2019K
+enum class EvName : uint16_t
+{
+	EV0		= (0x0001 << 7),
+	EV1		= (0x0001 << 6),
+	EV2		= (0x0001 << 5),
+	EV3		= (0x0001 << 4),
+	EV4		= (0x0001 << 3),
+	EV5		= (0x0001 << 2),
+	EV6		= (0x0001 << 1),
+	EV7		= (0x0001 << 0),
+	EV8		= (0x0001 << 15),
+	EV9		= (0x0001 << 14),
+	EV10	= (0x0001 << 13),
+	EV11	= (0x0001 << 12),
+	EV12	= (0x0001 << 11),
+	EV13	= (0x0001 << 10),
+	EV14	= (0x0001 << 9),
+	EV15	= (0x0001 << 8),
+};
+#else
 enum class EvName : uint16_t
 {
 	EV0		= (0x0001 << 0),
@@ -33,6 +54,7 @@ enum class EvName : uint16_t
 	EV14	= (0x0001 << 14),
 	EV15	= (0x0001 << 15),
 };
+#endif
 
 enum class EvState { Set, Reset };
 
@@ -57,8 +79,8 @@ public:
 
 	inline void setNewState(EvState newState)
 	{
-		if(newState == EvState::Set)GPIO_SetBits(usePortName, (uint16_t)useEvName);
-		else GPIO_ResetBits(usePortName, (uint16_t)useEvName);
+		if(newState == EvState::Set)GPIO_SetBits(usePortName, static_cast<uint16_t>(useEvName));
+		else GPIO_ResetBits(usePortName, static_cast<uint16_t>(useEvName));
 	}
 
 	virtual ~EV(){}

@@ -31,7 +31,8 @@ enum class CAN_TimeQuanta : uint8_t
 };
 
 template<uint8_t setAddress, CAN_TimeQuanta BS1_timeQuanta = CAN_TimeQuanta::tq4, CAN_TimeQuanta BS2_timeQuanta = CAN_TimeQuanta::tq2, uint8_t prescaler = 6>
-class ControlAreaNetwork {
+class ControlAreaNetwork 
+{
 public:
 	ControlAreaNetwork()
 	{
@@ -88,7 +89,6 @@ public:
 		NVIC_Init(&NVIC_InitStructure);
 	}
 
-
 	void sendData(uint8_t *Data, uint8_t DataLenge, uint8_t Address)
 	{
 		while(!(CAN1->TSR & CAN_TSR_TME0) || !(CAN1->TSR & CAN_TSR_TME1) || !(CAN1->TSR & CAN_TSR_TME2)); //To wait while mail boxes are pending.
@@ -104,7 +104,7 @@ public:
 	template<size_t S>
 	void sendData(const std::array<uint8_t, S> &SendDataArray, uint8_t Address)
 	{
-		static_assert( !(S > 8), "Size of SendDataArray has ");
+		static_assert( !(S > 8), "Size of SendDataArray has to be less than eight.");
 
 		while(!(CAN1->TSR & CAN_TSR_TME0) || !(CAN1->TSR & CAN_TSR_TME1) || !(CAN1->TSR & CAN_TSR_TME2)); //To wait while mail boxes are pending.
 		CanTxMsg CanTxMsgStructure;
