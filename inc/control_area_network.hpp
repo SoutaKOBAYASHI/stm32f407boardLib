@@ -6,6 +6,7 @@
 #include <map>
 #include <queue>
 #include <utility>
+#include <functional>
 
 #include "stm32f4xx.h"
 #include "stm32f4xx_conf.h"
@@ -30,11 +31,54 @@ enum class CAN_TimeQuanta : uint8_t
 	tq16	= 0x0F
 };
 
-template<uint8_t setAddress, CAN_TimeQuanta BS1_timeQuanta = CAN_TimeQuanta::tq4, CAN_TimeQuanta BS2_timeQuanta = CAN_TimeQuanta::tq2, uint8_t prescaler = 6>
-class ControlAreaNetwork 
+class ControlAreaNetwork
 {
 public:
-	ControlAreaNetwork()
+	void sendData(uint8_t *Data, uint8_t DataLenge, uint8_t Address)
+	{
+		while(!(CAN1->TSR & CAN_TSR_TME0) || !(CAN1->TSR & CAN_TSR_TME1) || !(CAN1->TSR & CAN_TSR_TME2)); //To wait while mail boxes are pending.
+		CanTxMsg CanTxMsgStructure;
+		CanTxMsgStructure.StdId		= static_cast<uint32_t>(Address);
+		CanTxMsgStructure.IDE		= CAN_ID_STD;
+		CanTxMsgStructure.RTR		= CAN_RTR_DATA;
+		CanTxMsgStructure.DLC		= DataLenge;
+		for(uint8_t i = 0 ; i < DataLenge ; i++)CanTxMsgStructure.Data[i] = Data[i];
+		CAN_Transmit(CAN1 , &CanTxMsgStructure);
+	}
+
+	template<size_t S>
+	void sendData(const std::array<uint8_t, S> &SendDataArray, uint8_t Address)
+	{
+		static_assert( !(S > 8), "Size of SendDataArray has to be less than eight.");
+
+		while(!(CAN1->TSR & CAN_TSR_TME0) || !(CAN1->TSR & CAN_TSR_TME1) || !(CAN1->TSR & CAN_TSR_TME2)); //To wait while mail boxes are pending.
+		CanTxMsg CanTxMsgStructure;
+		CanTxMsgStructure.StdId				= static_cast<uint32_t>(Address);
+		CanTxMsgStructure.IDE				= CAN_ID_STD;
+		CanTxMsgStructure.RTR				= CAN_RTR_DATA;
+		CanTxMsgStructure.DLC	= S;
+		for(uint8_t i = 0 ; i < CanTxMsgStructure.DLC ; i++)CanTxMsgStructure.Data[i] = SendDataArray[i];
+		CAN_Transmit(CAN1 , &CanTxMsgStructure);
+	}
+
+	void sendRemote(uint8_t Address)
+	{
+		while(!(CAN1->TSR & CAN_TSR_TME0) || !(CAN1->TSR & CAN_TSR_TME1) || !(CAN1->TSR & CAN_TSR_TME2)); //To wait while mail boxes are pending.
+		CanTxMsg CanTxMsgStructure;
+		CanTxMsgStructure.StdId		= static_cast<uint32_t>(Address);
+		CanTxMsgStructure.IDE		= CAN_ID_STD;
+		CanTxMsgStructure.RTR		= CAN_RTR_REMOTE;
+		CanTxMsgStructure.DLC		= 0;
+		CAN_Transmit(CAN1 , &CanTxMsgStructure);
+		return;
+	}
+};
+
+template<uint8_t setAddress, CAN_TimeQuanta BS1_timeQuanta = CAN_TimeQuanta::tq4, CAN_TimeQuanta BS2_timeQuanta = CAN_TimeQuanta::tq2, uint8_t prescaler = 6>
+class CAN_Initialize
+{
+public:
+	CAN_Initialize()
 	{
 		static_assert(static_cast<uint8_t>(BS2_timeQuanta) <= static_cast<uint8_t>(CAN_TimeQuanta::tq8), "BS2_timeQuanta has to be less than 8.");
 
@@ -89,46 +133,32 @@ public:
 		NVIC_Init(&NVIC_InitStructure);
 	}
 
-	void sendData(uint8_t *Data, uint8_t DataLenge, uint8_t Address)
+	ControlAreaNetwork can_interface;
+}; // namespase CAN_Initialize
+
+class CAN_Interrupt
+{
+public:
+	CAN_Interrupt() = delete;
+
+	CAN_Interrupt(const std::function<void(const CanRxMsg&)>&& addFunc)
 	{
-		while(!(CAN1->TSR & CAN_TSR_TME0) || !(CAN1->TSR & CAN_TSR_TME1) || !(CAN1->TSR & CAN_TSR_TME2)); //To wait while mail boxes are pending.
-		CanTxMsg CanTxMsgStructure;
-		CanTxMsgStructure.StdId		= static_cast<uint32_t>(Address);
-		CanTxMsgStructure.IDE		= CAN_ID_STD;
-		CanTxMsgStructure.RTR		= CAN_RTR_DATA;
-		CanTxMsgStructure.DLC		= DataLenge;
-		for(uint8_t i = 0 ; i < DataLenge ; i++)CanTxMsgStructure.Data[i] = Data[i];
-		CAN_Transmit(CAN1 , &CanTxMsgStructure);
+		can_call_functions_.insert(std::make_pair(this, addFunc));
 	}
 
-	template<size_t S>
-	void sendData(const std::array<uint8_t, S> &SendDataArray, uint8_t Address)
+	static void callback()
 	{
-		static_assert( !(S > 8), "Size of SendDataArray has to be less than eight.");
-
-		while(!(CAN1->TSR & CAN_TSR_TME0) || !(CAN1->TSR & CAN_TSR_TME1) || !(CAN1->TSR & CAN_TSR_TME2)); //To wait while mail boxes are pending.
-		CanTxMsg CanTxMsgStructure;
-		CanTxMsgStructure.StdId				= static_cast<uint32_t>(Address);
-		CanTxMsgStructure.IDE				= CAN_ID_STD;
-		CanTxMsgStructure.RTR				= CAN_RTR_DATA;
-		CanTxMsgStructure.DLC	= S;
-		for(uint8_t i = 0 ; i < CanTxMsgStructure.DLC ; i++)CanTxMsgStructure.Data[i] = SendDataArray[i];
-		CAN_Transmit(CAN1 , &CanTxMsgStructure);
-	}
-
-	void sendRemote(uint8_t Address)
-	{
-		while(!(CAN1->TSR & CAN_TSR_TME0) || !(CAN1->TSR & CAN_TSR_TME1) || !(CAN1->TSR & CAN_TSR_TME2)); //To wait while mail boxes are pending.
-		CanTxMsg CanTxMsgStructure;
-		CanTxMsgStructure.StdId		= static_cast<uint32_t>(Address);
-		CanTxMsgStructure.IDE		= CAN_ID_STD;
-		CanTxMsgStructure.RTR		= CAN_RTR_REMOTE;
-		CanTxMsgStructure.DLC		= 0;
-		CAN_Transmit(CAN1 , &CanTxMsgStructure);
-		return;
+		CanRxMsg can_rx_msg_struct;
+		CAN_Receive(CAN1, CAN_FIFO0, &can_rx_msg_struct);
+		for(auto i : can_call_functions_)i.second(can_rx_msg_struct);
 	}
 
 
-}; // namespase ControlAreaNetwork
-
+	virtual ~CAN_Interrupt()
+	{
+		can_call_functions_.erase(this);
+	}
+private:
+	static std::map<CAN_Interrupt* const,const std::function<void(const CanRxMsg&)>> can_call_functions_;
+};
 #endif
