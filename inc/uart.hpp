@@ -127,7 +127,7 @@ private:
 		USART_ITConfig(useUartName_(), USART_IT_RXNE, ENABLE);
 
 		NVIC_InitTypeDef NVIC_InitStruct;
-		NVIC_InitStruct.NVIC_IRQChannel 					= 	useUartName == uartName::uart1 ? USART1_IRQn :
+		NVIC_InitStruct.NVIC_IRQChannel 					= 	useUartName == uartName::uart1 ? USART2_IRQn :
 																useUartName == uartName::uart2 ? USART3_IRQn : UART4_IRQn;
 		NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority	= IRQ_priority;
 		NVIC_InitStruct.NVIC_IRQChannelCmd					= ENABLE;
