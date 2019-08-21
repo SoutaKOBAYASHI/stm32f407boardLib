@@ -34,18 +34,6 @@ enum class CAN_TimeQuanta : uint8_t
 class ControlAreaNetwork
 {
 public:
-	void sendData(uint8_t *Data, uint8_t DataLenge, uint8_t Address)
-	{
-		while(!(CAN1->TSR & CAN_TSR_TME0) || !(CAN1->TSR & CAN_TSR_TME1) || !(CAN1->TSR & CAN_TSR_TME2)); //To wait while mail boxes are pending.
-		CanTxMsg CanTxMsgStructure;
-		CanTxMsgStructure.StdId		= static_cast<uint32_t>(Address);
-		CanTxMsgStructure.IDE		= CAN_ID_STD;
-		CanTxMsgStructure.RTR		= CAN_RTR_DATA;
-		CanTxMsgStructure.DLC		= DataLenge;
-		for(uint8_t i = 0 ; i < DataLenge ; i++)CanTxMsgStructure.Data[i] = Data[i];
-		CAN_Transmit(CAN1 , &CanTxMsgStructure);
-	}
-
 	template<size_t S>
 	void sendData(const std::array<uint8_t, S> &SendDataArray, uint8_t Address)
 	{
@@ -61,17 +49,9 @@ public:
 		CAN_Transmit(CAN1 , &CanTxMsgStructure);
 	}
 
-	void sendRemote(uint8_t Address)
-	{
-		while(!(CAN1->TSR & CAN_TSR_TME0) || !(CAN1->TSR & CAN_TSR_TME1) || !(CAN1->TSR & CAN_TSR_TME2)); //To wait while mail boxes are pending.
-		CanTxMsg CanTxMsgStructure;
-		CanTxMsgStructure.StdId		= static_cast<uint32_t>(Address);
-		CanTxMsgStructure.IDE		= CAN_ID_STD;
-		CanTxMsgStructure.RTR		= CAN_RTR_REMOTE;
-		CanTxMsgStructure.DLC		= 0;
-		CAN_Transmit(CAN1 , &CanTxMsgStructure);
-		return;
-	}
+	void sendData(uint8_t *Data, uint8_t DataLenge, uint8_t Address);
+
+	void sendRemote(uint8_t Address);
 };
 
 template<uint8_t setAddress, CAN_TimeQuanta BS1_timeQuanta = CAN_TimeQuanta::tq4, CAN_TimeQuanta BS2_timeQuanta = CAN_TimeQuanta::tq2, uint8_t prescaler = 6>
