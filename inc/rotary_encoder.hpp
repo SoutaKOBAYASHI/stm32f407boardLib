@@ -79,7 +79,8 @@ protected:
 				useRotEnc == encoderName::RotEnc3 ? RCC_APB1Periph_TIM4 :
 				useRotEnc == encoderName::RotEnc4 ? RCC_APB1Periph_TIM5 : RCC_APB2Periph_TIM8;
 
-		RCC_APB1PeriphClockCmd(RCC_Periph, ENABLE);
+		if constexpr (useRotEnc == encoderName::RotEnc1 || useRotEnc == encoderName::RotEnc5) RCC_APB2PeriphClockCmd(RCC_Periph, ENABLE);
+		else RCC_APB1PeriphClockCmd(RCC_Periph, ENABLE);
 	}
 
 	inline void configEncoderInterfaceMode_()
