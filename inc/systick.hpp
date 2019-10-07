@@ -5,8 +5,8 @@
  *      Author: User
  */
 
-#ifndef MYHEADERS_INTERRUPT_HPP_
-#define MYHEADERS_INTERRUPT_HPP_
+#ifndef SYSTICK_HPP_
+#define SYSTICK_HPP_
 
 #include <functional>
 #include <vector>
