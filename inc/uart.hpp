@@ -24,6 +24,11 @@ public:
 	UART() = delete;
 	UART(USART_TypeDef* const useUartName) : use_uart_name_(useUartName){}
 
+	inline uartName useUartName()
+	{
+		return	use_uart_name_ == USART2 ? uartName::uart1 :
+				use_uart_name_ == USART3 ? uartName::uart2 : uartName::uart3;
+	}
 	/*transmit a byte.*/
 	inline void transmitData(const uint8_t sendByte)
 	{
