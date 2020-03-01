@@ -8,6 +8,7 @@
 #include <systick.hpp>
 
 std::map<SysTick_Interrupt* const,const std::function<void(void)>> SysTick_Interrupt::callFunctions_;
+uint32_t SysTick_Interrupt::now_freq_;
 
 SysTick_Interrupt::SysTick_Interrupt(const std::function<void(void)>&& addFunc)
 {

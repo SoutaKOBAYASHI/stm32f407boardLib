@@ -19,19 +19,23 @@ class SysTick_Interrupt
 {
 private:
 	static std::map<SysTick_Interrupt* const,const std::function<void(void)>> callFunctions_;
+	static uint32_t now_freq_;
 public:
 	SysTick_Interrupt() = delete;
 	SysTick_Interrupt(const std::function<void(void)>&& addFunc);
 
-	static void init(uint32_t frequency, uint32_t priority)
+	static void init(const uint32_t frequency, const uint32_t priority)
 	{
 		RCC_ClocksTypeDef RCC_Clocks;
 		RCC_GetClocksFreq(&RCC_Clocks);
 		SysTick_Config(RCC_Clocks.HCLK_Frequency / frequency);
 		NVIC_SetPriority(SysTick_IRQn, priority);
+		now_freq_ = frequency;
 	}
 
 	static void update(){ for(auto i : callFunctions_)i.second(); }
+
+	static inline uint32_t readFreq(){ return now_freq_; }
 
 	virtual ~SysTick_Interrupt() { SysTick_Interrupt::callFunctions_.erase(this); }
 };
