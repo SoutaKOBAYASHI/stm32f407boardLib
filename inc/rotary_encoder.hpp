@@ -9,7 +9,7 @@
 #define MYHEADERS_ROTARY_ENCODER_HPP_
 
 #include <type_traits>
-
+#include <utility>
 #include "stm32f4xx.h"
 #include "stm32f4xx_conf.h"
 
